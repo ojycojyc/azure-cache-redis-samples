@@ -1,7 +1,10 @@
 package example.demo;
 
+import example.demo.model.Subscription;
+import example.demo.model.SubscriptionType;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.Transaction;
 
 /**
  * Redis test
@@ -42,6 +45,21 @@ public class App
         System.out.println( "\nCache Command  : CLIENT LIST" );
         System.out.println( "Cache Response : " + jedis.clientList());
 
+        Subscription subscription = new Subscription("123", "Elon Musk", 100, SubscriptionType.MONTHLY);
+        Bill bill = new Bill("Elon Must", 100);
+
+        Transaction t= jedis.multi();
+        t.sadd("subscription-123", subscription.toString());
+        t.sadd("bill-123", bill.toString());
+        t.exec();
+
         jedis.close();
+    }
+
+    public record Bill(String userId, double amount) {
+        public Bill(String userId, double amount) {
+            this.userId = userId;
+            this.amount = amount;
+        }
     }
 }
